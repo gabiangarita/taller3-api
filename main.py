@@ -59,3 +59,4 @@ def post_evento(bar_id: int, datos: dict):
 def delete_evento(bar_id: int, evento_id: str):
     db["eventos"].delete_one({"_id": ObjectId(evento_id), "bar_id": bar_id})
     return {'mensaje': 'Evento eliminado'}
+
