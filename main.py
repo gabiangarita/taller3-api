@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
+from bson import ObjectId
 from datetime import datetime
 import os
 
@@ -40,7 +41,9 @@ def post_comentario(bar_id: int, datos: dict):
 
 @app.get('/bares/{bar_id}/eventos')
 def get_eventos(bar_id: int):
-    eventos = list(db["eventos"].find({"bar_id": bar_id}, {"_id": 0}))
+    eventos = list(db["eventos"].find({"bar_id": bar_id}))
+    for e in eventos:
+        e["_id"] = str(e["_id"])  # ObjectId -> texto para poder enviarlo como JSON
     return eventos
 
 
@@ -50,3 +53,9 @@ def post_evento(bar_id: int, datos: dict):
     datos['fecha_creacion'] = datetime.now().isoformat()
     db["eventos"].insert_one(datos)
     return {'mensaje': 'Evento guardado'}
+
+
+@app.delete('/bares/{bar_id}/eventos/{evento_id}')
+def delete_evento(bar_id: int, evento_id: str):
+    db["eventos"].delete_one({"_id": ObjectId(evento_id), "bar_id": bar_id})
+    return {'mensaje': 'Evento eliminado'}
